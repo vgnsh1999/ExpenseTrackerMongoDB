@@ -10,12 +10,13 @@ const purchasepremium =async (req, res) => {
             key_secret: process.env.RAZORPAY_KEY_SECRET
         });
         const amount = 2500;
-
+// console.log(rzp)
         rzp.orders.create({amount, currency: "INR"}, (err, order) => {
             if(err) {
+                console.log(err);
                 throw new Error(JSON.stringify(err));
             }
-            req.user.createOrder({ orderid: order.id, status: 'PENDING'}).then(() => {
+            req.user.save({ orderid: order.id, status: 'PENDING'}).then(() => {
                 return res.status(201).json({ order, key_id : rzp.key_id});
 
             }).catch(err => {
@@ -30,17 +31,26 @@ const purchasepremium =async (req, res) => {
 
  const updateTransactionStatusSuccess = async (req, res ) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
         const { payment_id, order_id} = req.body;
-        const order  = await Order.findOne({where : {orderid : order_id}}) 
-        const promise1 =  order.update({ paymentid: payment_id, status: 'SUCCESSFUL'}) 
-        const promise2 =  req.user.update({ ispremiumuser: true }) 
+        const order = new Order({
+            paymentid:payment_id,
+            orderid:order_id,
+            status:'SUCCESSFUL',
+            userId:userId,
+        });
+        await order.save();
+        return res.status(202).json({sucess: true, message: "Transaction Successful", token: userController.generateAccessToken(userId,undefined,true) });
 
-        Promise.all([promise1, promise2]).then(()=> {
-            return res.status(202).json({sucess: true, message: "Transaction Successful", token: userController.generateAccessToken(userId,undefined,true) });
-        }).catch((error) => {
-            throw new Error(error);
-        })      
+        // const order  = await Order.findOne({where : {orderid : order_id}}) 
+        // const promise1 =  order.update({ paymentid: payment_id, status: 'SUCCESSFUL'}) 
+        // const promise2 =  req.user.update({ ispremiumuser: true }) 
+
+        // Promise.all([promise1, promise2]).then(()=> {
+        //     return res.status(202).json({sucess: true, message: "Transaction Successful", token: userController.generateAccessToken(userId,undefined,true) });
+        // }).catch((error) => {
+        //     throw new Error(error);
+        // })      
                 
     } catch (err) {
         console.log(err);
@@ -51,17 +61,27 @@ const purchasepremium =async (req, res) => {
 
 const updateTransactionStatusFail = async (req, res ) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
         const { payment_id, order_id} = req.body;
-        const order  = await Order.findOne({where : {orderid : order_id}}) 
-        const promise1 =  order.update({ paymentid: payment_id, status: 'FAILED'}) 
-        const promise2 =  req.user.update({ ispremiumuser: false }) 
+        const order = new Order({
+            paymentid:payment_id,
+            orderid:order_id,
+            status:'FAILED',
+            userId:userId,
+        });
+        await order.save();
+        return res.status(202).json({sucess: true, message: "Transaction Failed", token: userController.generateAccessToken(userId,undefined,false) });
+        // const userId = req.user._id;
+        // const { payment_id, order_id} = req.body;
+        // const order  = await Order.findOne({where : {orderid : order_id}}) 
+        // const promise1 =  order.update({ paymentid: payment_id, status: 'FAILED'}) 
+        // const promise2 =  req.user.update({ ispremiumuser: false })
 
-        Promise.all([promise1, promise2]).then(()=> {
-            return res.status(202).json({sucess: false, message: "Transaction Failed", token: userController.generateAccessToken(userId,undefined , false) });
-        }).catch((error) => {
-            throw new Error(error);
-        })      
+        // Promise.all([promise1, promise2]).then(()=> {
+        //     return res.status(202).json({sucess: false, message: "Transaction Failed", token: userController.generateAccessToken(userId,undefined , false) });
+        // }).catch((error) => {
+        //     throw new Error(error);
+        // })      
                 
     } catch (err) {
         console.log(err);
@@ -72,7 +92,8 @@ const updateTransactionStatusFail = async (req, res ) => {
 
 const getStatus = async (req,res,next)=>{
     try{
-        const status = await Order.findOne({ where: { userId:req.user.id , status:'SUCCESSFUL' }});
+        //  const status = await Order.findOne({ where: { userId:req.user.id , status:'SUCCESSFUL' }});
+        const status = await Order.findOne({ userId:req.user._id , status:'SUCCESSFUL' });
         return res.status(200).json({allStatus:status,success:true});
     } catch(err){
         console.log(JSON.stringify(err));

@@ -16,12 +16,14 @@ const userSchema = new Schema({
         required:true
     },
     ispremiumuser:{
-        type:String,
-        required:false
+        type:Boolean,
+        ref:'Order',
+        required:true
     },
     totalExpense:{
         type:Number,
-        required:false
+        ref:'Expense',
+        required:true
     }
 });
 

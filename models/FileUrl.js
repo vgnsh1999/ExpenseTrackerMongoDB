@@ -1,19 +1,52 @@
-const Sequelize = require('sequelize');
+const mongoose = require('mongoose');
 
-const sequelize = require('../util/database');
+const Schema = mongoose.Schema;
 
-const FileUrl = sequelize.define('fileurl',{
-    id:{
-        type:Sequelize.INTEGER,
-        autoIncrement:true,
-        allowNull:false,
-        primaryKey:true
-    },
+const fileURLSchema = new Schema({
     userId:{
-        type:Sequelize.INTEGER
+        type:Schema.Types.ObjectId,
+        ref:'User',
+        required:true
     },
-    fileUrl:Sequelize.STRING,
-    date:Sequelize.DATE
+    fileUrl:{
+        type:String,
+        required:true
+    },
+    date:{
+        type:Date,
+        required:true
+    }
 });
 
-module.exports = FileUrl;
+module.exports = mongoose.model('FileURL',fileURLSchema)
+
+
+
+
+
+
+
+
+
+
+
+
+// const Sequelize = require('sequelize');
+
+// const sequelize = require('../util/database');
+
+// const FileUrl = sequelize.define('fileurl',{
+//     id:{
+//         type:Sequelize.INTEGER,
+//         autoIncrement:true,
+//         allowNull:false,
+//         primaryKey:true
+//     },
+//     userId:{
+//         type:Sequelize.INTEGER
+//     },
+//     fileUrl:Sequelize.STRING,
+//     date:Sequelize.DATE
+// });
+
+// module.exports = FileUrl;

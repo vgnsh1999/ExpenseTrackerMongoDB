@@ -1,11 +1,11 @@
-// const express = require('express');
+const express = require('express');
 
-// const premiumFeatureController = require('../controllers/premiumfeaturecontrollers');
+const premiumFeatureController = require('../controllers/premiumfeaturecontrollers');
 
-// const authenticatemiddleware = require('../middleware/auth');
+const authenticatemiddleware = require('../middleware/auth');
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.get('/showLeaderBoard', authenticatemiddleware.authenticate, premiumFeatureController.getUserLeaderBoard);
+router.get('/showLeaderBoard', authenticatemiddleware.authenticate, premiumFeatureController.getUserLeaderBoard);
 
-// module.exports = router;
+module.exports = router;
